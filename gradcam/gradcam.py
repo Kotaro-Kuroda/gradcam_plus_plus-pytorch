@@ -47,7 +47,7 @@ class GradCAM:
             self.activations['value'] = output
 
         target_layer.register_forward_hook(forward_hook)
-        target_layer.register_backward_hook(backward_hook)
+        target_layer.register_full_backward_hook(backward_hook)
 
     @classmethod
     def from_config(cls, arch: torch.nn.Module, model_type: str, layer_name: str):
@@ -80,7 +80,7 @@ class GradCAM:
 
         saliency_map = (weights*activations).sum(1, keepdim=True)
         saliency_map = F.relu(saliency_map)
-        saliency_map = F.upsample(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
+        saliency_map = F.interpolate(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
         saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
         saliency_map = (saliency_map - saliency_map_min).div(saliency_map_max - saliency_map_min).data
 
@@ -145,7 +145,7 @@ class GradCAMpp(GradCAM):
 
         saliency_map = (weights*activations).sum(1, keepdim=True)
         saliency_map = F.relu(saliency_map)
-        saliency_map = F.upsample(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
+        saliency_map = F.interpolate(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
         saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
         saliency_map = (saliency_map-saliency_map_min).div(saliency_map_max-saliency_map_min).data
 
